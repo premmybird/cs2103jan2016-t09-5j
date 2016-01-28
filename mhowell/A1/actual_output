@@ -1,0 +1,51 @@
+
+<Welcome to TextBuddy by Morgan Howell!>
+          ---------------------           
+Changes will be saved to "hithere.txt"
+Type "help" for a list of available commands
+
+hithere.txt>$ 
+Added to hithere.txt: "12345 12345"
+
+hithere.txt>$ 
+Added to hithere.txt: "5678 91023"
+
+hithere.txt>$ ------------LIST FOR "hithere.txt"------------
+1. 12345 12345
+
+2. 5678 91023
+--------------------------------------------------------
+
+hithere.txt>$ 
+Deleted from hithere.txt: "12345 12345"
+
+hithere.txt>$ ------------LIST FOR "hithere.txt"------------
+1. 5678 91023
+--------------------------------------------------------
+
+hithere.txt>$ 
+Added to hithere.txt: "hello there"
+
+hithere.txt>$ 
+all content deleted from hithere.txt
+
+hithere.txt>$ 
+hithere.txt is empty.
+
+hithere.txt>$ 
+Please supply a supported command. Issue command 'help' for details.
+
+hithere.txt>$ 
+  ---------------HELP GUIDE---------------
+ |            LIST OF COMMANDS            |
+ |                                        |
+ | add ANY_TEXT_CAN_FOLLOW: adds text     |
+ | delete LINE_NUMBER: removes that entry |
+ | clear: removes all entries             |
+ | display: shows all entries             |
+ | exit: terminates the program           |
+  ----------------------------------------
+
+hithere.txt>$ 
+Thank you for using TextBuddy by Morgan Howell!
+Your additions were saved to hithere.txt

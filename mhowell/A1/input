@@ -1,0 +1,11 @@
+add 12345 12345
+add 5678 91023
+display
+delete 1
+display
+add hello there
+clear
+display
+
+help
+exit
