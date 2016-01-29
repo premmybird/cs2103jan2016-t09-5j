@@ -13,20 +13,20 @@ import java.io.BufferedReader;
 public class TextBuddy{
 	//Standard console response strings
 	private static final String MESSAGE_WELCOME_SCREEN = "\n<Welcome to TextBuddy by Morgan Howell!>\n"
-													+ "          ---------------------           \n"
-													+ "Changes will be saved to \"%1$s\"\n"
-													+ "Type \"help\" for a list of available commands\n";
+				+ "          ---------------------           \n"
+				+ "Changes will be saved to \"%1$s\"\n"
+				+ "Type \"help\" for a list of available commands\n";
 	private static final String MESSAGE_HELP_GUIDE = "\n   ---------------HELP GUIDE---------------\n"
-												+ "  |                                        |\n" 
-												+ "  | add ANY_TEXT_CAN_FOLLOW: adds text     |\n"
-												+ "  | delete LINE_NUMBER: removes that entry |\n"
-												+ "  | clear: removes all entries             |\n"
-												+ "  | display: shows all entries             |\n"
-												+ "  | exit: terminates the program           |\n"
-												+ "   ----------------------------------------\n";
+				+ "  |                                        |\n" 
+				+ "  | add ANY_TEXT_CAN_FOLLOW: adds text     |\n"
+				+ "  | delete LINE_NUMBER: removes that entry |\n"
+				+ "  | clear: removes all entries             |\n"
+				+ "  | display: shows all entries             |\n"
+				+ "  | exit: terminates the program           |\n"
+				+ "   ----------------------------------------\n";
 	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
-														+ "%2$s"
-														+ "--------------------------------------------------------\n";
+				+ "%2$s"
+				+ "--------------------------------------------------------\n";
 	private static final String MESSAGE_IO_EXCEPTION = "\nWe encountered an IOException while attempting to open the given file.\n";
 	private static final String MESSAGE_UNSUPPORTED_COMMAND = "\nYou've attempted an unsupported command. Issue command 'help' for details.\n";
 	private static final String MESSAGE_ABSENT_COMMAND = "\nPlease provide a command and press enter. Issue command 'help' for a list of valid commands.\n";
