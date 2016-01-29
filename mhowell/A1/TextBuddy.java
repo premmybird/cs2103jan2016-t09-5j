@@ -2,6 +2,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,281 +11,300 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 
 public class TextBuddy{
-  //Standard console response strings
-  private static final String WELCOME_SCREEN = "\n<Welcome to TextBuddy by Morgan Howell!>\n"
-                                             + "          ---------------------           \n"
-                                             + "Changes will be saved to \"%1$s\"\n"
-                                             + "Type \"help\" for a list of available commands\n";
-  private static final String HELP_GUIDE = "\n ---------------HELP GUIDE---------------\n"
-                                         + "  |                                        |\n" 
-                                         + "  | add ANY_TEXT_CAN_FOLLOW: adds text     |\n"
-                                         + "  | delete LINE_NUMBER: removes that entry |\n"
-                                         + "  | clear: removes all entries             |\n"
-                                         + "  | display: shows all entries             |\n"
-                                         + "  | exit: terminates the program           |\n"
-                                         + "   ----------------------------------------\n";
-  private static final String DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
-                                               + "%2$s"
-                                               + "--------------------------------------------------------\n";
-  private static final String IO_EXCEPTION = "\nWe encountered an IOException while attempting to open the given file.\n";
-  private static final String UNSUPPORTED_COMMAND = "\nPlease supply a supported command. Issue command 'help' for details.\n";
-  private static final String WRONG_FILEOUT = "\nMalformed Request: Supplied parameter does not follow expected format of (*.%1$s).\n";
-  private static final String WRONG_NUM_PARAMS = "\nMalformed Request: Please provide the correct number of parameters.\n";
-  private static final String SENTENCE_ADDED = "\nAdded to %1$s: \"%2$s\"\n";
-  private static final String BLANK_LINE_ATTEMPT = "\nA blank line was added to %1$s. Please consider adding something more meaningful next time.\n";
-  private static final String SENTENCE_DELETED = "\nDeleted from %1$s: \"%2$s\"\n";
-  private static final String MEMORY_CLEARED = "\nAll content cleared from %1$s.\n";
-  private static final String CURRENTLY_CLEARED = "\nAll content cleared from %1$s.\n";
-  private static final String EXIT = "\nThank you for using TextBuddy by Morgan Howell!"
-                                   + "Your additions were saved to %1$s";
-  private static final String COMMAND_PROMPT = "%1$s>$ "
-  //Add supported extensions for output file below (regex tested).
-  private static final String SUPPORTED_EXTENSIONS = "txt|md|rtf";
-  private static final String REGEX_EXTENSION_TEST = "\\w+\\.(" + SUPPORTED_EXTENSIONS + ")";
+	//Standard console response strings
+	private static final String MESSAGE_WELCOME_SCREEN = "\n<Welcome to TextBuddy by Morgan Howell!>\n"
+													+ "          ---------------------           \n"
+													+ "Changes will be saved to \"%1$s\"\n"
+													+ "Type \"help\" for a list of available commands\n";
+	private static final String MESSAGE_HELP_GUIDE = "\n   ---------------HELP GUIDE---------------\n"
+												+ "  |                                        |\n" 
+												+ "  | add ANY_TEXT_CAN_FOLLOW: adds text     |\n"
+												+ "  | delete LINE_NUMBER: removes that entry |\n"
+												+ "  | clear: removes all entries             |\n"
+												+ "  | display: shows all entries             |\n"
+												+ "  | exit: terminates the program           |\n"
+												+ "   ----------------------------------------\n";
+	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
+														+ "%2$s"
+														+ "--------------------------------------------------------\n";
+	private static final String MESSAGE_IO_EXCEPTION = "\nWe encountered an IOException while attempting to open the given file.\n";
+	private static final String MESSAGE_UNSUPPORTED_COMMAND = "\nYou've attempted an unsupported command. Issue command 'help' for details.\n";
+	private static final String MESSAGE_ABSENT_COMMAND = "\nPlease provide a command and press enter. Issue command 'help' for a list of valid commands.\n";
+	private static final String MESSAGE_WRONG_FILEOUT = "\nMalformed Request: Supplied parameter does not follow expected format of (*.%1$s).\n";
+	private static final String MESSAGE_WRONG_NUM_PARAMS = "\nMalformed Request: Please provide the correct number of parameters.\n";
+	private static final String MESSAGE_SENTENCE_ADDED = "\nAdded to %1$s: \"%2$s\"\n";
+	private static final String MESSAGE_BLANK_LINE_ATTEMPT = "\nA blank line was added to %1$s. Please consider adding something more meaningful next time.\n";
+	private static final String MESSAGE_DELETE_TYPE_ERROR = "\nPlease provide a valid line number to be deleted.\n";
+	private static final String MESSAGE_SENTENCE_DELETED = "\nDeleted from %1$s: \"%2$s\"\n";
+	private static final String MESSAGE_MEMORY_CLEARED = "\nAll content cleared from %1$s.\n";
+	private static final String MESSAGE_FILE_EMPTY = "\n%1$s is empty.\n";
+	private static final String MESSAGE_EXIT = "\nThank you for using TextBuddy by Morgan Howell!\n"
+											+ "Your additions were saved to %1$s\n";
+	private static final String MESSAGE_COMMAND_PROMPT = "%1$s>$ ";
+	//Add supported extensions for output file below (regex tested).
+	private static final String SUPPORTED_EXTENSIONS = "txt|md|rtf";
+	private static final String REGEX_EXTENSION_TEST = "\\w+\\.(" + SUPPORTED_EXTENSIONS + ")";
 
-  private enum CommandIssue  = {
-    HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, UNSUPPORTED, EXIT;
-  } 
+	public enum CommandIssue { 
+		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, EMPTY, UNSUPPORTED, EXIT
+		}
 
-  private List<String> data_list;
-  private File file_out;
-  private String file_name;
-  private int item_count;
+	private List<String> items;
+	private File fileOut;
+	private String fileName;
+	private int itemCount;
+	private Scanner systemIn;
 
-  public static void main(String[] args){
-    TextBuddy helper = TextBuddy.generateBuddyHelper();
-    Scanner sys_in = new Scanner(System.in);
-    String next_line = null;
-    do {
-      System.out.print(text_out + ">$ ");
-      next_line = sys_in.nextLine();
-      String[] input = next_line.split("\\s+");
+	public static void main(String[] args){
+	String sanitizedFileName = sanitizeArgs(args);
+		TextBuddy helper = TextBuddy.generateBuddyHelper(sanitizedFileName);
+		if(helper != null) {
+			helper.welcomeUser();
+			CommandIssue command;
+			
+			do {
+				//User input is normalized to an array always containing two elements (command + payload)
+				String[] parsedUserInput = helper.promptUser();
+				command = mapUserInputToCommand(parsedUserInput[0]);
+				helper.executeCommand(command, parsedUserInput[1]);
+			} while(command != CommandIssue.EXIT);
+			
+		}
+	}
 
-      if( input.length>0) {
-        String command = input[0];
-        switch(command) {
+	//Factory design pattern style object generator for instantiation and object setup
+	public static TextBuddy generateBuddyHelper(String fileName) {
+		try {
+			TextBuddy helper = new TextBuddy(fileName);
+			helper.restoreInMemory();
+			return helper;
+		} catch (UnsupportedOperationException err) {
+			System.out.println(err.getMessage());
+		} catch (IOException err) {
+			System.out.println(MESSAGE_IO_EXCEPTION);
+		}
+		return null;
+	}
 
-          case "add":
-            String display;
-            if(input.length>1) {
-              String[] sentence_portion = Arrays.copyOfRange(input, 1, input.length);
-              String sentence_parsed = String.join(" ",sentence_portion);
-              display = buddy.addText(sentence_parsed);
-            }
-            else
-            {
-              display = buddy.addText(null);
-            }
-            System.out.println(display);
-            break;
+	//Throws error upon malformed parameter types
+	public static String sanitizeArgs(String[] args) throws UnsupportedOperationException {
+		if (args.length == 1) {
+			//Validate given parameter as expected text file format
+			String unsanitizedFile = args[0];
+			Pattern pattern = Pattern.compile(REGEX_EXTENSION_TEST);
+			Matcher match = pattern.matcher(unsanitizedFile);
+			boolean isValidDataSource = match.matches();
+			if(isValidDataSource) {
+				return unsanitizedFile;
+			} else {
+				throw new UnsupportedOperationException(String.format(MESSAGE_WRONG_FILEOUT, SUPPORTED_EXTENSIONS));
+			}
+		} else {
+			throw new UnsupportedOperationException(MESSAGE_WRONG_NUM_PARAMS);
+		}
+	}
 
-          case "display":
-            display = buddy.getText();
-            System.out.println(display);
-            break;
+	public static CommandIssue mapUserInputToCommand(String userInput) {
+		CommandIssue command;
+		switch (userInput) {
+			case "add":
+				command = CommandIssue.ADD_ITEM;
+				break;
 
-          case "delete":
-            int target_index = -1;
-            try
-            {
-              target_index = Integer.parseInt(input[1]);
-            }
-            catch(NumberFormatException err)
-            {
-              System.out.println("\nPlease supply a number to be deleted.\n");
-              continue;
-            }
+			case "display":
+				command = CommandIssue.DISPLAY;
+				break;
 
-            if(input.length == 2 && target_index > 0 && buddy.getNumberOfItems() >= target_index)
-            {
-              display = buddy.deleteLine(target_index);
-              System.out.println(display);
-            }
-            else
-            {
-              System.out.println("\nPlease supply number representing line to be deleted with the 'delete' command.\n");
-            }
-            break;
+			case "delete":
+				command = CommandIssue.DELETE_ITEM;
+				break;
 
-          case "clear":
+			case "clear":
+				command = CommandIssue.CLEAR;
+				break;
 
-            if(buddy.getNumberOfItems() > 0)
-            {
-              buddy.clearText();
-              System.out.println("\nall content deleted from " + buddy.getFileName() + "\n");
-            }
-            else
-            {
-              System.out.println("\nGiven file has already been cleared.");
-            }
-            break;
+			case "help":
+				command = CommandIssue.HELP;
+				break;
+				
+			case "exit":
+				command = CommandIssue.EXIT;
+				break;
+				
+			case "":
+					command = CommandIssue.EMPTY;
 
-          case "help":
-            System.out.println(help_guide);
-            break;
-          case "exit":
-            System.out.println("\nThank you for using TextBuddy by Morgan Howell!");
-            System.out.println("Your additions were saved to " + text_out);
-            break;
-          default:
-            System.out.println("\nPlease supply a supported command. Issue command 'help' for details.\n");
-            break;
-        }
-      }
+			default:
+				command = CommandIssue.UNSUPPORTED;
+				break;
+		}
 
-    } while(!next_line.equals("exit"));
+		return command;
+	}
 
-    sys_in.close();
-  }
+	public TextBuddy(String fileName) {
+		this.fileName = fileName;
+		fileOut = new File(fileName);
+		items = new ArrayList<String>();
+		systemIn = new Scanner(System.in);
+	}
 
-  //Factory design pattern style object generator for instantiation and object setup
-  public static TextBuddy generateBuddyHelper(String fileName) {
-    try {
-      sanitizedFileOut = sanitizeArgs(fileName);
-      TextBuddy helper = new TextBuddy(sanitizedFileOut);
-      helper.restoreInMemory();
-      return helper;
-    } catch (UnsupportedOperationException err) {
-      System.out.println(err.getMessage());
-    } catch (IOException err) {
-      System.out.println(IO_EXCEPTION);
-    }
-    return null;
-  }
+	public void welcomeUser() {
+		System.out.println(String.format(MESSAGE_WELCOME_SCREEN, fileName));
+	}
 
-  //Throws error upon malformed parameter types
-  public static String sanitizeArgs(String[] args) throws UnsupportedOperationException {
-    if (args.length == 1) {
-      //Validate given parameter as expected text file format
-      String unsanitizedFile = args[0];
-      Pattern pattern = Pattern.compile("\\w+\\.("+ TextBuddy.SUPPORTED_EXTENSIONS + ")");
-      Matcher match = pattern.matcher(unsanitizedFile);
-      boolean isValidDataSource = match.matches();
-      if(isValidDataSource) {
-        return unsanitizedFile;
-      } else {
-        throw new UnsupportedOperationException(String.format(WRONG_FILEOUT, SUPPORTED_EXTENSIONS));
-      }
-    } else {
-      throw new UnsupportedOperationException(WRONG_NUM_PARAMS);
-    }
-  }
+	public String[] promptUser() {
+		System.out.print(String.format(MESSAGE_COMMAND_PROMPT, fileName));
+		String nextLine = systemIn.nextLine();
+		String[] userInput = nextLine.split("\\s+");
+		return sanitizeUserCommand(userInput);
+	}
 
-  public static CommandIssue mapUserInputToCommand(String userInput) {
-    CommandIssue command;
-    switch (userInput) {
-      case "add":
-        command = CommandIssue.ADD_ITEM;
-        break;
+	public void restoreInMemory() throws IOException {
+		if(fileOut.exists()) {
+			try(BufferedReader br = new BufferedReader(new FileReader(fileOut))) {
+				for(String line; (line = br.readLine()) != null;) {
+					items.add(line);
+					itemCount++;
+				}
+			}
+		} else {
+			fileOut.createNewFile();
+		}
+	}
 
-      case "display":
-        command = CommandIssue.DISPLAY;
-        break;
+	public void executeCommand(CommandIssue command, String payload) {
+		switch(command) {
+			case HELP:
+				showHelpGuider();
+				break;
 
-      case "delete":
-        command = CommandIssue.DELETE_ITEM;
-        break;
+			case ADD_ITEM:
+				addText(payload);
+				break;
 
-      case "clear":
-        command = CommandIssue.CLEAR;
-        break;
+			case DELETE_ITEM:
+				deleteLine(payload);
+				break;
 
-      case "help":
-        command = CommandIssue.HELP;
-        break;
+			case DISPLAY:
+				getText();
+				break;
 
-      case "exit":
-        command = CommandIssue.EXIT;
-        break;
+			case CLEAR:
+				clearText();
+				break;
 
-      default:
-        command = CommandIssue.UNSUPPORTED;
-        break;
-    }
+			case EMPTY:
+				notifyUnsupported(false);
+				break;
 
-    return command;
-  }
+			case UNSUPPORTED:
+				notifyUnsupported(true);
+				break;
 
-  public TextBuddy(String file_name) {
-    this.file_name = file_name;
-    file_out = new File(file_name);
-    data_list = new ArrayList<String>();
-  }
+			case EXIT:
+				showExit();
+				break;        
+		}
+		//save user changes persistently after every command in case of interrupt 
+		saveAndPersist();
+	}
 
-  public String addText(String sentence) {
-    String display;
-    if(sentence != null) {
-      data_list.add(sentence);
-      display = "\nAdded to " + file_name + ": \"" + sentence + "\"\n";
-    } else {
-      data_list.add(" ");
-      display = ;
-    }
-    item_count++;
-    return display;
-  }
+	//Normalizes all given user commands to an array of size two (e.g. [command, payload])
+	private String[] sanitizeUserCommand(String[] userInput) {
+		String[] normalizedUserCommand = new String[2];
+		if(userInput.length>1) {
+			String[] payloadPortions = Arrays.copyOfRange(userInput, 1, userInput.length);
+			String payloadParsed = String.join(" ", payloadPortions);
+			normalizedUserCommand[0] = userInput[0];
+			normalizedUserCommand[1] = payloadParsed;
+		} else if(userInput.length == 1) {
+			normalizedUserCommand[0] = userInput[0];
+			normalizedUserCommand[1] = "";
+		} else {
+			normalizedUserCommand[0] = "";
+			normalizedUserCommand[1] = "";
+		}
+		return normalizedUserCommand;
+	}
 
-  public String clearText() {
-    data_list.clear();
-    item_count=0;
-    return "\nAll content cleared from " + file_name + ".\n";
-  }
+	private void notifyUnsupported(Boolean unsupportedCommand) {
+		if(unsupportedCommand) {
+			System.out.println(MESSAGE_UNSUPPORTED_COMMAND);
+		} else {
+			System.out.println(MESSAGE_ABSENT_COMMAND);
+		}
+	}
 
-  public String getText() {
-    String display="";
-    if(!data_list.isEmpty()){
-      display += "------------LIST FOR \"" + file_name + "\"------------";
-      for(int i=0; i<data_list.size(); i++)
-      {
-        display += "\n" + (i+1) + ". " + data_list.get(i) + "\n";
-      }
-      display += "--------------------------------------------------------\n";
-    }
-    else {
-      display = "\n" + file_name + " is empty.\n";
-    }
-    return display;
-  }
-  
-  public String deleteLine(int line_number) {
-    String line = data_list.remove(line_number-1);
-    return "\nDeleted from " + file_name + ": \"" + line + "\"\n";  
-  }
+	private void showHelpGuider() {
+		System.out.println(MESSAGE_HELP_GUIDE);
+	}
 
-  public String getFileName() {
-    return file_name;
-  }
+	private void addText(String sentence) {
+		if(sentence == "") {
+			items.add("");
+			System.out.println(String.format(MESSAGE_BLANK_LINE_ATTEMPT, fileName));
+		} else {
+			items.add(sentence);
+			System.out.println(String.format(MESSAGE_SENTENCE_ADDED, fileName, sentence));
+		}
+		itemCount++;
+	}
 
-  public int getNumberOfItems() {
-    return item_count;
-  }
+	private void deleteLine(String lineNumber) {
+		try {
+			int targetIndex = Integer.parseInt(lineNumber);
+			if(targetIndex > 0 && itemCount >= targetIndex) {
+				String targetLine = items.remove(targetIndex-1);
+				System.out.println(String.format(MESSAGE_SENTENCE_DELETED, fileName, targetLine));
+				itemCount--;
+			} else {
+				throw new NumberFormatException();
+			}
+		} catch(NumberFormatException err) {
+			System.out.println(MESSAGE_DELETE_TYPE_ERROR);
+		}
+	}
 
-  public void restoreInMemory() throws IOException {
-    if(file_out.exists()) {
-      //stream in and stream out are the same in basic version
-      try(BufferedReader br = new BufferedReader(new FileReader(file_out))) {
-        for(String line; (line = br.readLine()) != null;) {
-            //transfer data from text file during object initialization
-            addText(line);
-        }
-      }
-    }
-  }
+	private void clearText() {
+		if(itemCount>0) {
+			items.clear();
+			itemCount = 0;
+			System.out.println(String.format(MESSAGE_MEMORY_CLEARED, fileName));
+		} else {
+			System.out.println(String.format(MESSAGE_FILE_EMPTY, fileName));
+		}
+	}
 
-  public void closeAndSavePersistent() throws Throwable {
-    if(item_count>0) { 
-      try(PrintWriter writer = new PrintWriter(file_name, "UTF-8")) {
-        for(String item : data_list) {
-          writer.println(item);
-        }
-      }
-    }
-    writer.close();
-  }
+	private void getText() {
+		if(!items.isEmpty()) {
+			String totalList = "";
+			for(int i = 0; i < items.size(); i++)
+			{
+				totalList += "\n" + (i+1) + ". " + items.get(i) + "\n";
+			}
+			System.out.println(String.format(MESSAGE_DISPLAY_TEMPLATE, fileName, totalList));
+		} else {
+			System.out.println(String.format(MESSAGE_FILE_EMPTY, fileName));
+		}
+	}
 
-
-
-
-
+	private void showExit() {
+		systemIn.close();
+		System.out.println(String.format(MESSAGE_EXIT, fileName));
+	}
+	
+	private void saveAndPersist() {
+		if(itemCount>0) { 
+			try(PrintWriter writer = new PrintWriter(fileName, "UTF-8")) {
+				for(String item : items) {
+					writer.println(item);
+				}
+			} catch(IOException err) {
+				System.out.println(MESSAGE_IO_EXCEPTION);
+			}
+		} 
+	}
 }
 
