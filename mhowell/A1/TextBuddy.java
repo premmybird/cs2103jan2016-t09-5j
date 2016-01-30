@@ -1,3 +1,51 @@
+
+/**
+ * TextBuddy - Morgan J. Howell 
+ * A1 Submission for CS2103
+ *
+ *
+ * This class is used to write, store, and retrieve one line notes that are organized into
+ * a numerical list. Please find details of commands, assumptions, and making the executable
+ * with a test suite below.
+ *
+ *
+ * Commands of TextBuddy
+ *-------------------------- 
+ *  1. add ANY_ STRING: Add items to your list.
+ *  2. delete N : Deletes the Nth line item of your list.  
+ *  3. display : Shows your current list to be saved into persistent memory.
+ *  4. clear : Deletes all items in the list.
+ *  5. help: Displays a list of all available commands.
+ *  6. exit: Exits the program.
+ *  
+ * Assumptions
+ *------------
+ *	1. Each operation will trigger a save into persistent memory, because the program
+ * extremely light weight I experimented with different forms and found no increased latency.
+ *	2. Not all file extension can be written to, I keep a static string of "approved extensions"
+ * (i.e. txt, md, and rtf) that are matched via regex on program startup.
+ *	3. All given commands can be normalized in a {command, payload} format.
+ *  4. Exceptions, such as deleting an item that doesn't exist and issuing unsupported commands,
+ * will not crash the program, rather only trigger print statements explaining the error.
+ *	5. The user will be writing a file in the current directory that the program sits, the program
+ * does not support absolute path parameters, only params of type "\w+\.(rtf|md|txt)".
+ *  6. I assumed that testing could just be carried out via the make file (i.e. "make test").
+ *				-"make test" pipes in expected input and prints diff with actual output and expected output,
+ *  7. I made a series of much smaller arbitrary assumptions such as commands having to follow a linear format
+ *  and always being lowercase. Also assumed that commands such as "add " would just write an empty line.
+ *  8. Last major assumption was that we can neglect whitespace, for instance "delete     9" just means "delete 9"
+ *  and "add hey   there    example" was intended as the format "add hey there example".
+ *
+ * ****Building and Testing TextBuddy****
+ *------------------ 
+ * - I created a makefile to streamline this process. Simply issue the following commands:
+ *   1. make clean (cleans all executables and testers)
+ *   2. make  (compiles the java program into a class file using javac)
+ *   3. make test (pipes the input file in and diffs it against an expected output file)
+ *
+ * @author Morgan Howell
+ */
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.File;
@@ -57,7 +105,7 @@ public class TextBuddy{
 
 	public static void main(String[] args){
 	String sanitizedFileName = sanitizeArgs(args);
-		TextBuddy helper = TextBuddy.generateBuddyHelper(sanitizedFileName);
+	TextBuddy helper = TextBuddy.generateBuddyHelper(sanitizedFileName);
 		if(helper != null) {
 			helper.welcomeUser();
 			CommandIssue command;
@@ -67,8 +115,7 @@ public class TextBuddy{
 				String[] parsedUserInput = helper.promptUser();
 				command = mapUserInputToCommand(parsedUserInput[0]);
 				helper.executeCommand(command, parsedUserInput[1]);
-			} while(command != CommandIssue.EXIT);
-			
+			} while(command != CommandIssue.EXIT);	
 		}
 	}
 
@@ -132,8 +179,9 @@ public class TextBuddy{
 				break;
 				
 			case "":
-					command = CommandIssue.EMPTY;
-
+				command = CommandIssue.EMPTY;
+				break;
+				
 			default:
 				command = CommandIssue.UNSUPPORTED;
 				break;

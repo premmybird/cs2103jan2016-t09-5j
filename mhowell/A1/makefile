@@ -17,11 +17,11 @@ clean:
 	$(RM) memory.txt
 
 test:
-	java TextBuddy memory.txt < test_input1.txt > actual_output1.txt
-	java TextBuddy memory.txt < test_input2.txt > actual_output2.txt
+	java TextBuddy memory.txt < testinput.txt > actualoutput1.txt
+	java TextBuddy memory.txt < testinput2.txt > actualoutput2.txt
 
-	DIFF1="$(diff actual_output1.txt expected_output1.txt)"
-	DIFF2="$(diff actual_output2.txt expected_output2.txt)"
+	DIFF1="$(diff actualoutput1.txt expected.txt)"
+	DIFF2="$(diff actualoutput2.txt expected2.txt)"
 
 	$(echo "difference of actual1 and expected1:\n")
 	$(echo DIFF1)
