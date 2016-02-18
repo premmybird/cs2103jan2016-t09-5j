@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.io.FileReader;
@@ -89,12 +90,16 @@ public class TextBuddy{
 	private static final String MESSAGE_EXIT = "\nThank you for using TextBuddy by Morgan Howell!\n"
 											+ "Your additions were saved to %1$s\n";
 	private static final String MESSAGE_COMMAND_PROMPT = "%1$s>$ ";
+	private static final String MESSAGE_ITEMS_SORTED = "%1 has been sorted alphabetically, type 'display' to check";
+
+	
 	//Add supported extensions for output file below (regex tested).
 	private static final String SUPPORTED_EXTENSIONS = "txt|md|rtf";
 	private static final String REGEX_EXTENSION_TEST = "\\w+\\.(" + SUPPORTED_EXTENSIONS + ")";
+	private static Pattern PATTERN_VALID_FILE = Pattern.compile(REGEX_EXTENSION_TEST);
 
 	public enum CommandIssue { 
-		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, EMPTY, UNSUPPORTED, EXIT
+		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, SORT, EMPTY, UNSUPPORTED, EXIT
 	}
 
 	private List<String> items;
@@ -102,6 +107,7 @@ public class TextBuddy{
 	private String fileName;
 	private int itemCount;
 	private Scanner systemIn;
+	
 
 	public static void main(String[] args) {
 		String sanitizedFileName = sanitizeArgs(args);
@@ -133,8 +139,7 @@ public class TextBuddy{
 		if (args.length == 1) {
 			//Validate given parameter as expected text file format
 			String unsanitizedFile = args[0];
-			Pattern pattern = Pattern.compile(REGEX_EXTENSION_TEST);
-			Matcher match = pattern.matcher(unsanitizedFile);
+			Matcher match = PATTERN_VALID_FILE.matcher(unsanitizedFile);
 			boolean isValidDataSource = match.matches();
 			if(isValidDataSource) {
 				return unsanitizedFile;
@@ -144,45 +149,6 @@ public class TextBuddy{
 		} else {
 			throw new UnsupportedOperationException(MESSAGE_WRONG_NUM_PARAMS);
 		}
-	}
-
-	private CommandIssue mapUserInputToCommand(String userInput) {
-		CommandIssue command;
-		switch (userInput) {
-			case "add":
-				command = CommandIssue.ADD_ITEM;
-				break;
-
-			case "display":
-				command = CommandIssue.DISPLAY;
-				break;
-
-			case "delete":
-				command = CommandIssue.DELETE_ITEM;
-				break;
-
-			case "clear":
-				command = CommandIssue.CLEAR;
-				break;
-
-			case "help":
-				command = CommandIssue.HELP;
-				break;
-				
-			case "exit":
-				command = CommandIssue.EXIT;
-				break;
-				
-			case "":
-				command = CommandIssue.EMPTY;
-				break;
-				
-			default:
-				command = CommandIssue.UNSUPPORTED;
-				break;
-		}
-
-		return command;
 	}
 
 	public TextBuddy(String fileName) {
@@ -216,7 +182,12 @@ public class TextBuddy{
 	public void displayCommandPrompt() {
 		System.out.print(String.format(MESSAGE_COMMAND_PROMPT, fileName));
 	}
-
+	
+	public void sortLinesAlphabetically() {
+		Collections.sort(items);
+		System.out.print(String.format(MESSAGE_ITEMS_SORTED, fileName));
+	}
+	
 	public void restoreInMemory() throws IOException {
 		if(fileOut.exists()) {
 			try(BufferedReader br = new BufferedReader(new FileReader(fileOut))) {
@@ -255,7 +226,11 @@ public class TextBuddy{
 			case CLEAR:
 				clearText();
 				break;
-
+			
+			case SORT:
+				sortLinesAlphabetically();
+				break;
+				
 			case EMPTY:
 				notifyUnsupported(false);
 				break;
@@ -271,33 +246,7 @@ public class TextBuddy{
 		//save user changes persistently after every command in case of interrupt 
 		saveAndPersist();
 	}
-
-	//Normalizes all given user commands to an array of size two (e.g. [command, payload])
-	private String[] sanitizeUserCommand(String[] userInput) {
-		String[] normalizedUserCommand = new String[2];
-		if(userInput.length>1) {
-			String[] payloadPortions = Arrays.copyOfRange(userInput, 1, userInput.length);
-			String payloadParsed = String.join(" ", payloadPortions);
-			normalizedUserCommand[0] = userInput[0];
-			normalizedUserCommand[1] = payloadParsed;
-		} else if(userInput.length == 1) {
-			normalizedUserCommand[0] = userInput[0];
-			normalizedUserCommand[1] = "";
-		} else {
-			normalizedUserCommand[0] = "";
-			normalizedUserCommand[1] = "";
-		}
-		return normalizedUserCommand;
-	}
-
-	private void notifyUnsupported(Boolean unsupportedCommand) {
-		if(unsupportedCommand) {
-			System.out.println(MESSAGE_UNSUPPORTED_COMMAND);
-		} else {
-			System.out.println(MESSAGE_ABSENT_COMMAND);
-		}
-	}
-
+	
 	public void showHelpGuider() {
 		System.out.println(MESSAGE_HELP_GUIDE);
 	}
@@ -351,7 +300,7 @@ public class TextBuddy{
 		}
 	}
 
-	private void showExit() {
+	public void showExit() {
 		systemIn.close();
 		System.out.println(String.format(MESSAGE_EXIT, fileName));
 	}
@@ -366,5 +315,74 @@ public class TextBuddy{
 				System.out.println(MESSAGE_IO_EXCEPTION);
 			}
 		} 
+	}
+	
+	//Normalizes all given user commands to an array of size two (e.g. [command, payload])
+	private String[] sanitizeUserCommand(String[] userInput) {
+		String[] normalizedUserCommand = new String[2];
+		if(userInput.length>1) {
+			String[] payloadPortions = Arrays.copyOfRange(userInput, 1, userInput.length);
+			String payloadParsed = String.join(" ", payloadPortions);
+			normalizedUserCommand[0] = userInput[0];
+			normalizedUserCommand[1] = payloadParsed;
+		} else if(userInput.length == 1) {
+			normalizedUserCommand[0] = userInput[0];
+			normalizedUserCommand[1] = "";
+		} else {
+			normalizedUserCommand[0] = "";
+			normalizedUserCommand[1] = "";
+		}
+		return normalizedUserCommand;
+	}
+	
+	private void notifyUnsupported(Boolean unsupportedCommand) {
+		if(unsupportedCommand) {
+			System.out.println(MESSAGE_UNSUPPORTED_COMMAND);
+		} else {
+			System.out.println(MESSAGE_ABSENT_COMMAND);
+		}
+	}
+	
+	private CommandIssue mapUserInputToCommand(String userInput) {
+		CommandIssue command;
+		switch (userInput) {
+			case "add":
+				command = CommandIssue.ADD_ITEM;
+				break;
+
+			case "display":
+				command = CommandIssue.DISPLAY;
+				break;
+
+			case "delete":
+				command = CommandIssue.DELETE_ITEM;
+				break;
+
+			case "clear":
+				command = CommandIssue.CLEAR;
+				break;
+				
+			case "sort":
+				command = CommandIssue.SORT;
+				break;
+				
+			case "help":
+				command = CommandIssue.HELP;
+				break;
+				
+			case "exit":
+				command = CommandIssue.EXIT;
+				break;
+				
+			case "":
+				command = CommandIssue.EMPTY;
+				break;
+				
+			default:
+				command = CommandIssue.UNSUPPORTED;
+				break;
+		}
+
+		return command;
 	}
 }

@@ -1,0 +1,10 @@
+
+public class Test {
+
+	public static void main(String[] args) {
+		TextBuddy buddy = TextBuddy.generateBuddyHelper("samplefile.txt");
+		buddy.cleanNumberPrefix("1. asdasd");
+
+	}
+
+}

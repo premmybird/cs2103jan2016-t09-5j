@@ -27,18 +27,17 @@ public class TextBuddyTest {
 	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
 				+ "%2$s"
 				+ "--------------------------------------------------------\n\n";
-	private static final String MESSAGE_IO_EXCEPTION = "\nWe encountered an IOException while attempting to open the given file.\n";
 	private static final String MESSAGE_UNSUPPORTED_COMMAND = "\nYou've attempted an unsupported command. Issue command 'help' for details.\n";
 	private static final String MESSAGE_ABSENT_COMMAND = "\nPlease provide a command and press enter. Issue command 'help' for a list of valid commands.\n";
 	private static final String MESSAGE_WRONG_FILEOUT = "\nMalformed Request: Supplied parameter does not follow expected format of (*.%1$s).\n";
 	private static final String MESSAGE_WRONG_NUM_PARAMS = "\nMalformed Request: Please provide the correct number of parameters.\n";
 	private static final String MESSAGE_SENTENCE_ADDED = "\nAdded to %1$s: \"%2$s\"\n";
-	private static final String MESSAGE_BLANK_LINE_ATTEMPT = "\nA blank line was added to %1$s. Please consider adding something more meaningful next time.\n";
-	private static final String MESSAGE_DELETE_TYPE_ERROR = "\nPlease provide a valid line number to be deleted.\n";
-	private static final String MESSAGE_SENTENCE_DELETED = "\nDeleted from %1$s: \"%2$s\"\n";
+	private static final String MESSAGE_BLANK_LINE_ATTEMPT = "\nA blank line was added to %1$s. Please consider adding something more meaningful next time.\n\n";
+	private static final String MESSAGE_DELETE_TYPE_ERROR = "Please provide a valid line number to be deleted.";
+	private static final String MESSAGE_SENTENCE_DELETED = "Deleted from %1$s: \"%2$s\"";
 	private static final String MESSAGE_MEMORY_CLEARED = "All content cleared from %1$s.";
-	private static final String MESSAGE_FILE_EMPTY = "\n%1$s is empty.\n";
-	private static final String MESSAGE_EXIT = "\nThank you for using TextBuddy by Morgan Howell!\n"
+	private static final String MESSAGE_FILE_EMPTY = "%1$s is empty.";
+	private static final String MESSAGE_EXIT = "Thank you for using TextBuddy by Morgan Howell!\n"
 											+ "Your additions were saved to %1$s\n";
 	private static final String MESSAGE_COMMAND_PROMPT = "%1$s>$ ";
 	//Add supported extensions for output file below (regex tested).
@@ -111,6 +110,7 @@ public class TextBuddyTest {
 		buddy.addText("sample text being added2");
 		buddy.addText("sample text being added3");
 		buddy.getText();
+		
 		String sampleDisplay = String.format(MESSAGE_DISPLAY_TEMPLATE,
 				"samplefile.txt",
 				"\n1. sample text being added1\n"
@@ -121,6 +121,7 @@ public class TextBuddyTest {
 		String sampleAdd2 = "\nAdded to samplefile.txt: \"sample text being added2\"\n\n";
 		String sampleAdd3 = "\nAdded to samplefile.txt: \"sample text being added3\"\n\n";
 		String totalSampleDisplay = sampleAdd1 + sampleAdd2 + sampleAdd3 + sampleDisplay;
+		
 		assertEquals(totalSampleDisplay, outContent.toString());
 	}
 	
@@ -131,7 +132,10 @@ public class TextBuddyTest {
 		buddy.addText("sample text being added3");
 		buddy.deleteLine("2");
 		List<String> items = buddy.getItems();
+		
 		assertEquals(items.get(1), "sample text being added3");
+		assertEquals(String.format(MESSAGE_SENTENCE_DELETED, "samplefile.txt", "sample text being added2"),
+				lastLineOfSeries(outContent));
 	}
 	
 	@Test
@@ -146,16 +150,12 @@ public class TextBuddyTest {
 		buddy.addText("sample text being added2");
 		buddy.addText("sample text being added3");
 		buddy.clearText();
+		
 		List<String> items = buddy.getItems();
 		assertEquals(items.isEmpty(), true);
-		assertEquals(items.isEmpty(), true);
-		String sampleOutput = lastLineOfSeries(outContent.toString().trim());
+		
 		assertEquals(String.format(MESSAGE_MEMORY_CLEARED.toString(), "samplefile.txt"), 
-				sampleOutput.trim().toString());	
-	}
-	
-	private String lastLineOfSeries(String paragraph) {
-		return paragraph.substring(paragraph.lastIndexOf("\n"));
+				lastLineOfSeries(outContent));	
 	}
 	
 	@Test
@@ -166,28 +166,49 @@ public class TextBuddyTest {
 		buddy.clearText();
 		buddy.getText();
 		
+		assertEquals(String.format(MESSAGE_FILE_EMPTY, "samplefile.txt"), 
+				lastLineOfSeries(outContent));
 	}
 	
 	@Test
 	public void testDeleteAfterClear() {
+		buddy.addText("sample text being added1");
+		buddy.addText("sample text being added2");
+		buddy.addText("sample text being added3");
+		buddy.clearText();
+		buddy.deleteLine("2");
+		buddy.getText();
 		
+		assertEquals(String.format(MESSAGE_FILE_EMPTY, "samplefile.txt"), 
+				lastLineOfSeries(outContent));
 	}
 	
 	@Test
 	public void testExitMessage() {
+		buddy.showExit();
 		
+		int[] targetedLines = {1,0};
+		String targetedLastLinesOfActualOutput = lastLines(outContent, targetedLines);
+		assertEquals(String.format(MESSAGE_EXIT, "samplefile.txt"), 
+				targetedLastLinesOfActualOutput);
 	}
 	
 	@Test
 	public void testTriggerDeleteError() {
-		
+		buddy.addText("sample text being added1");
+		buddy.addText("sample text being added2");
+		buddy.addText("sample text being added3");
+		buddy.deleteLine("-1000");
+		assertEquals(String.format(MESSAGE_DELETE_TYPE_ERROR), 
+				lastLineOfSeries(outContent));
 	}
 	
 	@Test
 	public void testTriggerAddError() {
-		
+		buddy.addText("");
+		assertEquals(String.format(MESSAGE_BLANK_LINE_ATTEMPT, "samplefile.txt"), 
+				outContent.toString());
 	}
-	
 	
 	@After
 	public void cleanUpStreams() {
@@ -195,6 +216,22 @@ public class TextBuddyTest {
 	    System.setErr(null);
 	}
 	
+	//Sometimes we want to clean standard output to just read the last line or couple of lines for convenience
+	private String lastLineOfSeries(ByteArrayOutputStream outContent) {
+		String paragraph = outContent.toString().trim();
+		return paragraph.substring(paragraph.lastIndexOf("\n")).trim();
+	}
+	
+	private String lastLines(ByteArrayOutputStream outContent, int[] targetIndicesFromLast) {
+		String[] parsedInput = outContent.toString().split("\\n");
+		String targetFormat = "";
+		for(int i : targetIndicesFromLast) {
+			targetFormat += parsedInput[parsedInput.length-1-i] + "\n";
+		}
+		return targetFormat;
+	}
+	
+	//Stubbing system in if necessary to mock user input
 	private void spoofSystemInput(String input) {
 		try {
 			System.setIn(new ByteArrayInputStream(input.getBytes("UTF-8")));
