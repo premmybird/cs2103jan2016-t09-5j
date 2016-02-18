@@ -71,8 +71,6 @@ public class TextBuddy{
 				+ "  | delete LINE_NUMBER: removes that entry |\n"
 				+ "  | clear: removes all entries             |\n"
 				+ "  | display: shows all entries             |\n"
-				+ "  | sort: sorts all entries alphabetically |\n"
-				+ "  | search WORD: shows all lines with word |\n"
 				+ "  | exit: terminates the program           |\n"
 				+ "   ----------------------------------------\n";
 	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
@@ -197,7 +195,7 @@ public class TextBuddy{
 		for(int i=0; i<items.size(); i++) {
 			String testingLine = items.get(i);
 			if(testingLine.contains(targetWord)) {
-				lineNumbersContainingWord.add(i+1);
+				lineNumbersContainingWord.add(i);
 			}
 		}
 		
@@ -335,7 +333,7 @@ public class TextBuddy{
 				if(i == lineNumbersContainingWord.size()-1) {
 					System.out.print(".\n");
 				} else {
-					System.out.print(" , ");
+					System.out.println(" , ");
 				}
 			}
 		} else {

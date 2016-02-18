@@ -71,8 +71,6 @@ public class TextBuddy{
 				+ "  | delete LINE_NUMBER: removes that entry |\n"
 				+ "  | clear: removes all entries             |\n"
 				+ "  | display: shows all entries             |\n"
-				+ "  | sort: sorts all entries alphabetically |\n"
-				+ "  | search WORD: shows all lines with word |\n"
 				+ "  | exit: terminates the program           |\n"
 				+ "   ----------------------------------------\n";
 	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
@@ -93,8 +91,7 @@ public class TextBuddy{
 											+ "Your additions were saved to %1$s\n";
 	private static final String MESSAGE_COMMAND_PROMPT = "%1$s>$ ";
 	private static final String MESSAGE_ITEMS_SORTED = "\n%1 has been sorted alphabetically, type 'display' to check\n";
-	private static final String MESSAGE_LINES_FOUND = "\nThe following lines contain the given word: ";
-	private static final String MESSAGE_NO_LINES_FOUND = "\nNo lines contain the provided word: \n";
+	private static final String MESSAGE_LINES_FOUND = "\nThe following lines contain the given word: \n";
 
 	
 	//Add supported extensions for output file below (regex tested).
@@ -103,7 +100,7 @@ public class TextBuddy{
 	private static Pattern PATTERN_VALID_FILE = Pattern.compile(REGEX_EXTENSION_TEST);
 
 	public enum CommandIssue { 
-		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, SORT, SEARCH, EMPTY, UNSUPPORTED, EXIT
+		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, SORT, EMPTY, UNSUPPORTED, EXIT
 	}
 
 	private List<String> items;
@@ -197,11 +194,30 @@ public class TextBuddy{
 		for(int i=0; i<items.size(); i++) {
 			String testingLine = items.get(i);
 			if(testingLine.contains(targetWord)) {
-				lineNumbersContainingWord.add(i+1);
+				lineNumbersContainingWord.add(i);
 			}
 		}
 		
-		printLinesContainingWord(lineNumbersContainingWord);
+		printLinesContainingWord(lineNUmbersContainingWord);
+	}
+	
+	private void printLinesContainingWord(List<Integer> lineNumbersContainingWord) {
+		if(lineNumbersContainingWord.size()>0) {
+			System.out.println(MESSAGE_LINES_FOUND);
+			
+			for(int i=0; i< lineNumbersContainingWord.size(); i++) {
+				System.out.print(lineNumbersContainingWord.get(i));
+				
+				if(i == lineNumbersContainingWord.size()-1) {
+					System.out.print(" , ");
+				}
+				else {
+					System.out.println(".");
+				}
+			}
+		} else {
+			System.out.println(MESSAGE_NO_LINES_FOUND);
+		}
 	}
 	
 	public void restoreInMemory() throws IOException {
@@ -221,6 +237,48 @@ public class TextBuddy{
 		return items;
 	}
 
+	private void executeCommand(CommandIssue command, String payload) {
+		switch(command) {
+			case HELP:
+				showHelpGuider();
+				break;
+
+			case ADD_ITEM:
+				addText(payload);
+				break;
+
+			case DELETE_ITEM:
+				deleteLine(payload);
+				break;
+
+			case DISPLAY:
+				getText();
+				break;
+
+			case CLEAR:
+				clearText();
+				break;
+			
+			case SORT:
+				sortLinesAlphabetically();
+				break;
+				
+			case EMPTY:
+				notifyUnsupported(false);
+				break;
+
+			case UNSUPPORTED:
+				notifyUnsupported(true);
+				break;
+
+			case EXIT:
+				showExit();
+				break;        
+		}
+		//save user changes persistently after every command in case of interrupt 
+		saveAndPersist();
+	}
+	
 	public void showHelpGuider() {
 		System.out.println(MESSAGE_HELP_GUIDE);
 	}
@@ -279,70 +337,6 @@ public class TextBuddy{
 		System.out.println(String.format(MESSAGE_EXIT, fileName));
 	}
 	
-	private void executeCommand(CommandIssue command, String payload) {
-		switch(command) {
-			case HELP:
-				showHelpGuider();
-				break;
-
-			case ADD_ITEM:
-				addText(payload);
-				break;
-
-			case DELETE_ITEM:
-				deleteLine(payload);
-				break;
-
-			case DISPLAY:
-				getText();
-				break;
-
-			case CLEAR:
-				clearText();
-				break;
-				
-			case SEARCH:
-				searchForWord(payload);
-				break;
-				
-			case SORT:
-				sortLinesAlphabetically();
-				break;
-				
-			case EMPTY:
-				notifyUnsupported(false);
-				break;
-
-			case UNSUPPORTED:
-				notifyUnsupported(true);
-				break;
-
-			case EXIT:
-				showExit();
-				break;        
-		}
-		//save user changes persistently after every command in case of interrupt 
-		saveAndPersist();
-	}
-	
-	private void printLinesContainingWord(List<Integer> lineNumbersContainingWord) {
-		if(lineNumbersContainingWord.size()>0) {
-			System.out.print(MESSAGE_LINES_FOUND);
-			
-			for(int i=0; i< lineNumbersContainingWord.size(); i++) {
-				System.out.print(lineNumbersContainingWord.get(i));
-				
-				if(i == lineNumbersContainingWord.size()-1) {
-					System.out.print(".\n");
-				} else {
-					System.out.print(" , ");
-				}
-			}
-		} else {
-			System.out.println(MESSAGE_NO_LINES_FOUND);
-		}
-	}
-	
 	private void saveAndPersist() {
 		if(itemCount>0) { 
 			try(PrintWriter writer = new PrintWriter(fileName, "UTF-8")) {
@@ -398,10 +392,6 @@ public class TextBuddy{
 
 			case "clear":
 				command = CommandIssue.CLEAR;
-				break;
-				
-			case "search":
-				command = CommandIssue.SEARCH;
 				break;
 				
 			case "sort":
