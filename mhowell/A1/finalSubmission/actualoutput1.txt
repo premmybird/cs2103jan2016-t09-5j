@@ -1,0 +1,168 @@
+
+<Welcome to TextBuddy by Morgan Howell!>
+          ---------------------           
+Changes will be saved to "memory.txt"
+Type "help" for a list of available commands
+
+memory.txt>$ 
+   ---------------HELP GUIDE---------------
+  |                                        |
+  | add ANY_TEXT_CAN_FOLLOW: adds text     |
+  | delete LINE_NUMBER: removes that entry |
+  | clear: removes all entries             |
+  | display: shows all entries             |
+  | exit: terminates the program           |
+   ----------------------------------------
+
+memory.txt>$ 
+Added to memory.txt: "12345 56789"
+
+memory.txt>$ 
+Added to memory.txt: "testing here, I am testing"
+
+memory.txt>$ 
+Added to memory.txt: "take me to the grocery store"
+
+memory.txt>$ 
+Added to memory.txt: "This is a cool test with a cool make file!"
+
+memory.txt>$ 
+------------LIST FOR "memory.txt"------------
+
+1. 12345 56789
+
+2. testing here, I am testing
+
+3. take me to the grocery store
+
+4. This is a cool test with a cool make file!
+--------------------------------------------------------
+
+memory.txt>$ 
+Deleted from memory.txt: "12345 56789"
+
+memory.txt>$ 
+Deleted from memory.txt: "take me to the grocery store"
+
+memory.txt>$ 
+------------LIST FOR "memory.txt"------------
+
+1. testing here, I am testing
+
+2. This is a cool test with a cool make file!
+--------------------------------------------------------
+
+memory.txt>$ 
+Deleted from memory.txt: "testing here, I am testing"
+
+memory.txt>$ 
+Added to memory.txt: "testing is soo cool, I love it."
+
+memory.txt>$ 
+Added to memory.txt: "Time to go for some corner cases soon."
+
+memory.txt>$ 
+------------LIST FOR "memory.txt"------------
+
+1. This is a cool test with a cool make file!
+
+2. testing is soo cool, I love it.
+
+3. Time to go for some corner cases soon.
+--------------------------------------------------------
+
+memory.txt>$ 
+All content cleared from memory.txt.
+
+memory.txt>$ 
+memory.txt is empty.
+
+memory.txt>$ 
+memory.txt is empty.
+
+memory.txt>$ 
+Added to memory.txt: "first one to be added"
+
+memory.txt>$ 
+Deleted from memory.txt: "first one to be added"
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+A blank line was added to memory.txt. Please consider adding something more meaningful next time.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Added to memory.txt: "now let's think of some clever edge cases"
+
+memory.txt>$ 
+Please provide a command and press enter. Issue command 'help' for a list of valid commands.
+
+memory.txt>$ 
+Please provide a command and press enter. Issue command 'help' for a list of valid commands.
+
+memory.txt>$ 
+You've attempted an unsupported command. Issue command 'help' for details.
+
+memory.txt>$ 
+You've attempted an unsupported command. Issue command 'help' for details.
+
+memory.txt>$ 
+You've attempted an unsupported command. Issue command 'help' for details.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Please provide a valid line number to be deleted.
+
+memory.txt>$ 
+Added to memory.txt: "null"
+
+memory.txt>$ 
+Added to memory.txt: "TEST0"
+
+memory.txt>$ 
+All content cleared from memory.txt.
+
+memory.txt>$ 
+   ---------------HELP GUIDE---------------
+  |                                        |
+  | add ANY_TEXT_CAN_FOLLOW: adds text     |
+  | delete LINE_NUMBER: removes that entry |
+  | clear: removes all entries             |
+  | display: shows all entries             |
+  | exit: terminates the program           |
+   ----------------------------------------
+
+memory.txt>$ 
+Please provide a command and press enter. Issue command 'help' for a list of valid commands.
+
+memory.txt>$ 
+Added to memory.txt: "wow, hope we survived that. We can run make test to run our diffs to test that."
+
+memory.txt>$ 
+Added to memory.txt: "We're going to exit and reload this to make sure persistent memory works!"
+
+memory.txt>$ 
+Thank you for using TextBuddy by Morgan Howell!
+Your additions were saved to memory.txt
+

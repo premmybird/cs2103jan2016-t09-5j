@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="TextBuddyTest" project="TextBuddy" tests="14" started="14" failures="0" errors="0" ignored="0">
+  <testsuite name="TextBuddyTest" time="0.001">
+    <testcase name="testDeleteAfterClear" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testCommandDisplay" classname="TextBuddyTest" time="0.001"/>
+    <testcase name="testTriggerDeleteError" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testArgumentSanitizationInvalidNumberOfArgs" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testShowHelpMenu" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testDisplayingEvents" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testDeletingEvents" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testShowPersistentMemory" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testUserWelcomePrompt" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testArgumentSanitizationInvalidExtension" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testTriggerAddError" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testClearingList" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testDisplayAfterClear" classname="TextBuddyTest" time="0.0"/>
+    <testcase name="testAddEventFeature" classname="TextBuddyTest" time="0.0"/>
+  </testsuite>
+</testrun>

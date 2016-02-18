@@ -1,0 +1,23 @@
+import static org.junit.Assert.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.Test;
+
+public class TextBuddyTest {
+	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+
+
+	public void setUp(){
+		TextBuddy buddy = TextBuddy.generateBuddyHelper("samplefile.txt");
+	    System.setOut(new PrintStream(outContent));
+	    System.setErr(new PrintStream(errContent));
+	}
+	
+	public void testAdd(){
+		
+	}
+
+
+}

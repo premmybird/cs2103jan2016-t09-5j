@@ -1,0 +1,3 @@
+wow, hope we survived that. We can run make test to run our diffs to test that.
+We're going to exit and reload this to make sure persistent memory works!
+since we reloaded this file using the same file previously, we should have access to our old items
