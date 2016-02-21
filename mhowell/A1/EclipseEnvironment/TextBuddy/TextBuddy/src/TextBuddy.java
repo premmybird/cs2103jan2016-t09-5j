@@ -95,6 +95,7 @@ public class TextBuddy{
 	private static final String MESSAGE_ITEMS_SORTED = "\n%1$s has been sorted alphabetically, type 'display' to check.\n";
 	private static final String MESSAGE_ITEMS_NOT_SORTED = "\n%1$s has no items to be sorted.\n";
 	private static final String MESSAGE_LINES_FOUND = "\nThe following lines contain the given word: ";
+	private static final String MESSAGE_BLANK_SEARCH_ATTEMPT = "\n Please specify a string to search for. Type 'help' for a list of commands. \n";
 	private static final String MESSAGE_NO_LINES_FOUND = "\nNo lines contain the provided word: \"%1$s\"\n";
 
 	//Add supported extensions for output file below (regex tested).
@@ -196,16 +197,20 @@ public class TextBuddy{
 	}
 	
 	public void searchForWord(String targetWord) {
-		List<Integer> lineNumbersContainingWord = new ArrayList<Integer>();
-		
-		for(int i=0; i<items.size(); i++) {
-			String testingLine = items.get(i);
-			if(testingLine.contains(targetWord)) {
-				lineNumbersContainingWord.add(i+1);
+		if(targetWord != "") {
+			List<Integer> lineNumbersContainingWord = new ArrayList<Integer>();
+			
+			for(int i=0; i<items.size(); i++) {
+				String testingLine = items.get(i);
+				if(testingLine.contains(targetWord)) {
+					lineNumbersContainingWord.add(i+1);
+				}
 			}
+			
+			printLinesContainingWord(lineNumbersContainingWord, targetWord);
+		} else {
+			printLinesContainingWord(null, null);
 		}
-		
-		printLinesContainingWord(lineNumbersContainingWord, targetWord);
 	}
 	
 	public void restoreInMemory() throws IOException {
@@ -330,7 +335,9 @@ public class TextBuddy{
 	}
 	
 	private void printLinesContainingWord(List<Integer> lineNumbersContainingWord, String targetWord) {
-		if(lineNumbersContainingWord.size()>0) {
+		if (lineNumbersContainingWord == null) {
+			System.out.println(MESSAGE_BLANK_SEARCH_ATTEMPT);
+		} else if(lineNumbersContainingWord.size()>0) {
 			System.out.print(MESSAGE_LINES_FOUND);
 			
 			for(int i=0; i< lineNumbersContainingWord.size(); i++) {
