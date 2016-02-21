@@ -1,11 +1,9 @@
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,11 +27,8 @@ public class TextBuddyTest {
 	private static final String MESSAGE_DISPLAY_TEMPLATE = "\n------------LIST FOR \"%1$s\"------------\n"
 				+ "%2$s"
 				+ "--------------------------------------------------------\n\n";
-	private static final String MESSAGE_UNSUPPORTED_COMMAND = "\nYou've attempted an unsupported command. Issue command 'help' for details.\n";
-	private static final String MESSAGE_ABSENT_COMMAND = "\nPlease provide a command and press enter. Issue command 'help' for a list of valid commands.\n";
 	private static final String MESSAGE_WRONG_FILEOUT = "\nMalformed Request: Supplied parameter does not follow expected format of (*.%1$s).\n";
 	private static final String MESSAGE_WRONG_NUM_PARAMS = "\nMalformed Request: Please provide the correct number of parameters.\n";
-	private static final String MESSAGE_SENTENCE_ADDED = "\nAdded to %1$s: \"%2$s\"\n";
 	private static final String MESSAGE_BLANK_LINE_ATTEMPT = "\nA blank line was added to %1$s. Please consider adding something more meaningful next time.\n\n";
 	private static final String MESSAGE_DELETE_TYPE_ERROR = "Please provide a valid line number to be deleted.";
 	private static final String MESSAGE_SENTENCE_DELETED = "Deleted from %1$s: \"%2$s\"";
@@ -46,15 +41,9 @@ public class TextBuddyTest {
 	private static final String MESSAGE_ITEMS_NOT_SORTED = "%1$s has no items to be sorted.";
 	private static final String MESSAGE_LINES_FOUND = "The following lines contain the given word: ";
 	private static final String MESSAGE_NO_LINES_FOUND = "No lines contain the provided word: \"%1$s\"";
-	
-	//Add supported extensions for output file below (regex tested).
 	private static final String SUPPORTED_EXTENSIONS = "txt|md|rtf";
-	private static final String REGEX_EXTENSION_TEST = "\\w+\\.(" + SUPPORTED_EXTENSIONS + ")";
-	
-	public enum CommandIssue { 
-		HELP, ADD_ITEM, DELETE_ITEM, CLEAR, DISPLAY, EMPTY, UNSUPPORTED, EXIT
-	}
-	
+
+	//Stubbing standard input and output for mocked streams
 	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 	private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
 	protected TextBuddy buddy;
@@ -293,7 +282,7 @@ public class TextBuddyTest {
 	    System.setErr(null);
 	}
 	
-	//Sometimes we want to clean standard output to just read the last line or couple of lines for convenience
+	//Sometimes we want to clean standard output to just read the last line or last couple of lines for convenience
 	private String lastLineOfSeries(ByteArrayOutputStream outContent) {
 		String paragraph = outContent.toString().trim();
 		return paragraph.substring(paragraph.lastIndexOf("\n")).trim();
@@ -308,7 +297,7 @@ public class TextBuddyTest {
 		return targetFormat;
 	}
 	
-	//Stubbing system in if necessary to mock user input
+	//Stubbing sys in if necessary to mock user input
 	private void spoofSystemInput(String input) {
 		try {
 			System.setIn(new ByteArrayInputStream(input.getBytes("UTF-8")));

@@ -1,12 +1,12 @@
 
 /**
  * TextBuddy - Morgan J. Howell 
- * A1 Submission for CS2103
+ * CE2 Submission for CS2103
  *
  *
  * This class is used to write, store, and retrieve one line notes that are organized into
  * a numerical list. Please find details of commands, assumptions, and making the executable
- * with a test suite below.
+ * with a test suite (JUnit) below.
  *
  *
  * Commands of TextBuddy
@@ -15,12 +15,14 @@
  *  2. delete N : Deletes the Nth line item of your list.  
  *  3. display : Shows your current list to be saved into persistent memory.
  *  4. clear : Deletes all items in the list.
- *  5. help: Displays a list of all available commands.
- *  6. exit: Exits the program.
+ *  5. search ANY_STRING: Search current list for string, line by line
+ *  6. sort: Sorts all items alphabetically
+ *  7. help: Displays a list of all available commands.
+ *  8. exit: Exits the program.
  *  
  * Assumptions
  *------------
- *	1. Each operation will trigger a save into persistent memory, because the program
+ *	1. Each operation will trigger a save into persistent memory, because the program is
  * extremely light weight I experimented with different forms and found no increased latency.
  *	2. Not all file extension can be written to, I keep a static string of "approved extensions"
  * (i.e. txt, md, and rtf) that are matched via regex on program startup.
@@ -42,6 +44,7 @@
  *   1. make clean (cleans all executables and testers)
  *   2. make  (compiles the java program into a class file using javac)
  *   3. make test (pipes the input file in and diffs it against an expected output file)
+ *   4. please note if you are using JUnit, the makefile is unnecessary for testing and compiling
  *
  * @author Morgan Howell
  */
@@ -116,10 +119,7 @@ public class TextBuddy{
 	public static void main(String[] args) {
 		String sanitizedFileName = sanitizeArgs(args);
 		TextBuddy helper = TextBuddy.generateBuddyHelper(sanitizedFileName);
-		if(helper != null) {
-			helper.welcomeUser();
-			helper.readUserInputUntilExit();
-		}
+		TextBuddy.initiateValidCommandStream(helper);
 	}
 
 	//Factory design pattern style object generator for instantiation and object setup
@@ -154,7 +154,14 @@ public class TextBuddy{
 			throw new UnsupportedOperationException(MESSAGE_WRONG_NUM_PARAMS);
 		}
 	}
-
+	
+	public static void initiateValidCommandStream(TextBuddy helper) {
+		if(helper != null) {
+			helper.welcomeUser();
+			helper.readUserInputUntilExit();
+		}
+	}
+	
 	public TextBuddy(String fileName) {
 		this.fileName = fileName;
 		fileOut = new File(fileName);
@@ -334,6 +341,7 @@ public class TextBuddy{
 		saveAndPersist();
 	}
 	
+	//Prints all the line numbers that contain the given string searched for, unless null or no match is found
 	private void printLinesContainingWord(List<Integer> lineNumbersContainingWord, String targetWord) {
 		if (lineNumbersContainingWord == null) {
 			System.out.println(MESSAGE_BLANK_SEARCH_ATTEMPT);
@@ -344,7 +352,7 @@ public class TextBuddy{
 				System.out.print(lineNumbersContainingWord.get(i));
 				
 				if(i == lineNumbersContainingWord.size()-1) {
-					System.out.print(".\n");
+					System.out.println(".\n");
 				} else {
 					System.out.print(", ");
 				}

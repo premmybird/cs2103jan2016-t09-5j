@@ -1,6 +1,0 @@
-display
-add since we reloaded this file using the same file previously, we should have access to our old items
-clear display
-delete 1
-display
-exit
